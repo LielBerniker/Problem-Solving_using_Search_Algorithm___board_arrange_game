@@ -5,6 +5,7 @@ public class main {
     public static void main(String[] args)
     {
       Fix_Me_Board board_information = get_board_information();
+
     }
     public static Fix_Me_Board get_board_information()
     {
