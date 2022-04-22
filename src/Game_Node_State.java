@@ -1,4 +1,7 @@
-public class Game_Node_State {
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
+public class Game_Node_State implements Comparable<Game_Node_State>{
     private char[][] Prev_State;
     private char[][] Current_State;
     private String Path;
@@ -104,10 +107,14 @@ public class Game_Node_State {
         }
         return score;
     }
-
+   public String get_node_unique_key()
+   {
+       return Arrays.deepToString(this.getCurrent_state());
+   }
 
     public char[][] getPrev_state() {
         return Prev_State;
+
     }
 
 
@@ -121,5 +128,25 @@ public class Game_Node_State {
 
     public int getCost() {
         return Cost;
+    }
+    @Override
+    public boolean equals(Object o)
+    {
+
+        // If the object is compared with itself then return true
+        if (o == this) {
+            return true;
+        }
+
+        /* Check if o is an instance of Complex or not
+          "null instanceof [type]" also returns false */
+        if (!(o instanceof Game_Node_State)) {
+            return false;
+        }
+        for
+    }
+    @Override
+    public int compareTo(Game_Node_State o) {
+        return 0;
     }
 }

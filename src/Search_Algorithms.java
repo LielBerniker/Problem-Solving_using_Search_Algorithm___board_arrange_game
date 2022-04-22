@@ -18,12 +18,9 @@ public class Search_Algorithms {
         while(!all_states.isEmpty())
         {
             current_node_state = all_states.poll();
-            if(current_node_state.getCurrent_state().equals(this.board.getGoal_State()))
-            {
-                System.out.println("finish");
-            }
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
+
                      current_node_count =0;
                      if(current_node_state.can_ball_move_up(i,j))
                      {
