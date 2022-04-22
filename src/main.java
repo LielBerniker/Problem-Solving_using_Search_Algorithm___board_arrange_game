@@ -4,10 +4,10 @@ import java.util.Scanner;
 public class main {
     public static void main(String[] args)
     {
-      Fix_Me_Board board_information = get_board_information();
+      Game_Board board_information = get_board_information();
 
     }
-    public static Fix_Me_Board get_board_information()
+    public static Game_Board get_board_information()
     {
         Scanner scanner = null;
         int line_count = 0,cur_size;
@@ -59,7 +59,7 @@ public class main {
             }
             line_count++;
         }
-     Fix_Me_Board board_information = new Fix_Me_Board(algorithm_name,open,board_size,current_state,goal_state);
+     Game_Board board_information = new Game_Board(algorithm_name,open,board_size,current_state,goal_state);
         return board_information;
     }
 }
