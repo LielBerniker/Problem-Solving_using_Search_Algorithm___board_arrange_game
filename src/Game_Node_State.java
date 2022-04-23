@@ -5,16 +5,19 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     private char[][] Prev_State;
     private char[][] Current_State;
     private String Path;
+    private int Board_size;
     private int Cost;
+
 
     public Game_Node_State(String cur_state, int board_size){
         this.Current_State = new char[board_size][board_size];
         this.Prev_State= new char[board_size][board_size];
         this.Path ="";
         this.Cost =0;
+        this.Board_size = board_size;
         int k =0;
-        for (int i = 0; i < board_size; i++) {
-            for (int j = 0; j < board_size; j++) {
+        for (int i = 0; i < this.Board_size; i++) {
+            for (int j = 0; j < this.Board_size; j++) {
                 this.Current_State[i][j] = cur_state.charAt(k);
                 this.Prev_State[i][j] = cur_state.charAt(k);
                 k = k+2;
@@ -23,10 +26,11 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     }
     public Game_Node_State(Game_Node_State present_state, Direction direct, int board_size, int row , int col){
         char temp_char;
+        this.Board_size = board_size;
         this.Current_State = new char[board_size][board_size];
         this.Prev_State= present_state.getCurrent_state();
-        for (int i = 0; i < board_size; i++) {
-            for (int j = 0; j < board_size; j++) {
+        for (int i = 0; i < this.Board_size; i++) {
+            for (int j = 0; j < this.Board_size; j++) {
                 this.Current_State[i][j] = present_state.getPrev_state()[i][j];
             }
         }
@@ -64,27 +68,27 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
         this.Path = this.Path + current_move;
     }
-    public boolean can_ball_move_up(int row,int col)
+    public boolean can_ball_move_up(int row)
     {
-      if(row-1<0 || this.Current_State[row-1][col]!='_' )
+      if(row-1<0 )
           return false;
       return true;
     }
-    public boolean can_ball_move_down(int row,int col,int board_size)
+    public boolean can_ball_move_down(int row)
     {
-        if(row+1>=board_size || this.Current_State[row+1][col]!='_' )
+        if(row+1>=this.Board_size )
             return false;
         return true;
     }
-    public boolean can_ball_move_right(int row,int col,int board_size)
+    public boolean can_ball_move_right(int col)
     {
-        if(col+1>=board_size || this.Current_State[row][col+1]!='_' )
+        if(col+1>=this.Board_size )
             return false;
         return true;
     }
-    public boolean can_ball_move_left(int row,int col)
+    public boolean can_ball_move_left(int col)
     {
-        if(col-1<0 || this.Current_State[row][col-1]!='_' )
+        if(col-1<0 )
             return false;
         return true;
     }
@@ -107,6 +111,12 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
         return score;
     }
+    public boolean contain_ball(int row, int col)
+    {
+        if(this.getCurrent_state()[row][col] != '_')
+        {return true;}
+        return false;
+    }
    public String get_node_unique_key()
    {
        return Arrays.deepToString(this.getCurrent_state());
@@ -116,7 +126,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         return Prev_State;
 
     }
-
+    public int getBoard_size() {
+        return Board_size;
+    }
 
     public char[][] getCurrent_state() {
         return Current_State;
@@ -143,7 +155,14 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         if (!(o instanceof Game_Node_State)) {
             return false;
         }
-        for
+        char[][] compared_node = ((Game_Node_State) o).getCurrent_state();
+        for (int i = 0; i <this.getBoard_size() ; i++) {
+            for (int j = 0; j < this.getBoard_size(); j++) {
+                if(compared_node[i][j] != this.getCurrent_state()[i][j])
+                    return false;
+            }
+        }
+        return true;
     }
     @Override
     public int compareTo(Game_Node_State o) {
