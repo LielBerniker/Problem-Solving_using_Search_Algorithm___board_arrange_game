@@ -2,7 +2,6 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Game_Node_State implements Comparable<Game_Node_State>{
-    private char[][] Prev_State;
     private char[][] Current_State;
     private String Path;
     private int Board_size;
@@ -11,7 +10,6 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
 
     public Game_Node_State(String cur_state, int board_size){
         this.Current_State = new char[board_size][board_size];
-        this.Prev_State= new char[board_size][board_size];
         this.Path ="";
         this.Cost =0;
         this.Board_size = board_size;
@@ -19,7 +17,6 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         for (int i = 0; i < this.Board_size; i++) {
             for (int j = 0; j < this.Board_size; j++) {
                 this.Current_State[i][j] = cur_state.charAt(k);
-                this.Prev_State[i][j] = cur_state.charAt(k);
                 k = k+2;
             }
         }
@@ -28,10 +25,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         char temp_char;
         this.Board_size = board_size;
         this.Current_State = new char[board_size][board_size];
-        this.Prev_State= present_state.getCurrent_state();
         for (int i = 0; i < this.Board_size; i++) {
             for (int j = 0; j < this.Board_size; j++) {
-                this.Current_State[i][j] = present_state.getPrev_state()[i][j];
+                this.Current_State[i][j] = present_state.getCurrent_state()[i][j];
             }
         }
         temp_char = this.Current_State[row][col];
@@ -122,10 +118,6 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
        return Arrays.deepToString(this.getCurrent_state());
    }
 
-    public char[][] getPrev_state() {
-        return Prev_State;
-
-    }
     public int getBoard_size() {
         return Board_size;
     }
