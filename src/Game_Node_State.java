@@ -21,70 +21,74 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
             }
         }
     }
-    public Game_Node_State(Game_Node_State present_state, Direction direct, int board_size, int row , int col){
+    public Game_Node_State(Game_Node_State prev_node, Direction direct, int board_size, int row , int col){
         char temp_char;
+        this.Path ="";
         this.Board_size = board_size;
         this.Current_State = new char[board_size][board_size];
         for (int i = 0; i < this.Board_size; i++) {
             for (int j = 0; j < this.Board_size; j++) {
-                this.Current_State[i][j] = present_state.getCurrent_state()[i][j];
+                this.Current_State[i][j] = prev_node.getCurrent_state()[i][j];
             }
         }
         temp_char = this.Current_State[row][col];
-        this.Cost = present_state.Cost+ get_cost_by_color(temp_char);
-        set_board_state(row,col,direct,temp_char);
+        set_board_state(row,col,direct,prev_node);
 
     }
-    private void set_board_state(int row, int col,Direction direct,char ball)
+    private void set_board_state(int row, int col,Direction direct,Game_Node_State prev_node)
     {
+        int current_cost =0;
         String current_move="";
         switch(direct) {
             case UP:
-                current_move = "(" + (row+1) +"," +(col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+2) +"," + (col+1) +")--" ;
+
                 this.Current_State[row][col] = this.Current_State[row-1][col];
-                this.Current_State[row-1][col] = ball;
+                this.Current_State[row-1][col] = '_';
+                current_move = "(" +(row+2) +"," + (col+1)  + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
                 break;
             case DOWN:
-                current_move = "(" + (row+1) +"," +(col+1) + "):" + this.Current_State[row][col]+ ":("+ (row) +"," + (col+1) +")--" ;
                 this.Current_State[row][col] = this.Current_State[row+1][col];
-                this.Current_State[row+1][col] = ball;
+                this.Current_State[row+1][col] = '_';
+                current_move = "(" + (row) +"," + (col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
                 break;
             case LEFT:
-                current_move = "(" + (row+1) +"," +(col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," + (col) +")--" ;
                 this.Current_State[row][col] = this.Current_State[row][col-1];
-                this.Current_State[row][col-1] = ball;
+                this.Current_State[row][col-1] = '_';
+                current_move = "(" + (row+1) +"," + (col) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
                 break;
             case RIGHT:
-                current_move = "(" + (row+1) +"," +(col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+2) +"," + (col+2) +")--" ;
                 this.Current_State[row][col] = this.Current_State[row][col+1];
-                this.Current_State[row][col+1] = ball;
+                this.Current_State[row][col+1] = '_';
+                current_move = "(" + (row+1) +"," + (col+2)  + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
                 break;
             default:
                 break;
         }
-        this.Path = this.Path + current_move;
+        this.Cost = prev_node.Cost+ get_cost_by_color(this.Current_State[row][col]);
+        this.Path = prev_node.getPath() + current_move;
+
     }
-    public boolean can_ball_move_up(int row)
+    public boolean can_move_ball_from_above(int row, int col)
     {
-      if(row-1<0 )
+      if( row-1<0  || this.getCurrent_state()[row-1][col]=='_')
           return false;
       return true;
     }
-    public boolean can_ball_move_down(int row)
+    public boolean can_move_ball_from_below(int row, int col)
     {
-        if(row+1>=this.Board_size )
+        if(row+1>=this.Board_size|| this.getCurrent_state()[row+1][col]=='_')
             return false;
         return true;
     }
-    public boolean can_ball_move_right(int col)
+    public boolean can_move_ball_from_the_right(int row,int col)
     {
-        if(col+1>=this.Board_size )
+        if(col+1>=this.Board_size || this.getCurrent_state()[row][col+1]=='_')
             return false;
         return true;
     }
-    public boolean can_ball_move_left(int col)
+    public boolean can_move_ball_from_the_left(int row,int col)
     {
-        if(col-1<0 )
+        if(col-1<0 || this.getCurrent_state()[row][col-1]=='_')
             return false;
         return true;
     }
@@ -107,9 +111,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
         return score;
     }
-    public boolean contain_ball(int row, int col)
+    public boolean is_empty_block(int row, int col)
     {
-        if(this.getCurrent_state()[row][col] != '_')
+        if(this.getCurrent_state()[row][col] == '_')
         {return true;}
         return false;
     }
@@ -123,15 +127,15 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     }
 
     public char[][] getCurrent_state() {
-        return Current_State;
+        return this.Current_State;
     }
 
     public String getPath() {
-        return Path;
+        return this.Path;
     }
 
     public int getCost() {
-        return Cost;
+        return this.Cost;
     }
     @Override
     public boolean equals(Object o)

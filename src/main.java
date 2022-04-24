@@ -1,11 +1,12 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 public class main {
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws IOException {
       Game_Board board_information = get_board_information();
-
+      Search_Algorithms search_algo = new Search_Algorithms(board_information);
+      search_algo.BFS();
     }
     public static Game_Board get_board_information()
     {
@@ -13,7 +14,8 @@ public class main {
         int line_count = 0,cur_size;
         String algorithm_name="",open="",board_size="",goal_state="",current_state="";
         try {
-            scanner = new Scanner(new File("input.txt"));
+            File myObj = new File("input.txt");
+            scanner = new Scanner(myObj);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -35,10 +37,10 @@ public class main {
                     else{
                         cur_size = 5;
                     }
-                    goal_state += line;
+                    current_state += line+',';
                     for (int i = 1; i <cur_size; i++) {
                         line = scanner.nextLine();
-                        goal_state += line;
+                        current_state += line+',';
                     }
                     break;
                 case 4:
@@ -48,10 +50,10 @@ public class main {
                     else{
                         cur_size = 5;
                     }
-                        current_state += line;
+                        goal_state += line+',';
                         for (int i = 1; i <cur_size; i++) {
                             line = scanner.nextLine();
-                           current_state  += line;
+                           goal_state  += line+',';
                         }
                     break;
                 default:

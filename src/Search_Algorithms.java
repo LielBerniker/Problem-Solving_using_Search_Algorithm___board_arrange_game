@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Search_Algorithms {
@@ -7,8 +10,7 @@ public class Search_Algorithms {
     {
         this.board = board;
     }
-    public void BFS()
-    {
+    public void BFS() throws IOException {
         Game_Node_State start_node,goal_node,current_node_state;
         int current_node_count =0;
         start_node = this.board.getFirst_State();
@@ -32,7 +34,7 @@ public class Search_Algorithms {
                 {
                     if(current_child.equals(goal_node))
                     {
-                        System.out.println("finish");
+                        create_output(current_child);
                     }
                     all_states.add(current_child);
                     frontier_nodes.put(current_child.get_node_unique_key(),current_child);
@@ -47,24 +49,24 @@ public class Search_Algorithms {
         List<Game_Node_State> possible_children = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if(current_node.contain_ball(i,j))
+                if(current_node.is_empty_block(i,j))
                 {
-                    if(current_node.can_ball_move_up(i))
+                    if(current_node.can_move_ball_from_above(i,j))
                     {
                         Game_Node_State current_node_state_up = new Game_Node_State(current_node,Direction.UP,size,i,j);
                         possible_children.add(current_node_state_up);
                     }
-                    if(current_node.can_ball_move_down(i))
+                    if(current_node.can_move_ball_from_below(i,j))
                     {
                         Game_Node_State current_node_state_down = new Game_Node_State(current_node,Direction.DOWN,size,i,j);
                         possible_children.add(current_node_state_down);
                     }
-                    if(current_node.can_ball_move_right(j))
+                    if(current_node.can_move_ball_from_the_right(i,j))
                     {
                         Game_Node_State current_node_state_right = new Game_Node_State(current_node,Direction.RIGHT,size,i,j);
                         possible_children.add(current_node_state_right);
                     }
-                    if(current_node.can_ball_move_left(j))
+                    if(current_node.can_move_ball_from_the_left(i,j))
                     {
                         Game_Node_State current_node_state_left = new Game_Node_State(current_node,Direction.LEFT,size,i,j);
                         possible_children.add(current_node_state_left);
@@ -72,5 +74,18 @@ public class Search_Algorithms {
             }
         }
        return possible_children;
+    }
+    public void create_output(Game_Node_State final_node) throws IOException {
+        String path = final_node.getPath();
+        String balls_movement = path.substring(0, path.length() - 2);
+        String all_info = balls_movement + "\nNum: " + this.board.getNode_counter()+"\nCost: " + final_node.getCost();
+        try {
+            FileWriter myWriter = new FileWriter("output.txt");
+            myWriter.write(all_info);
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
