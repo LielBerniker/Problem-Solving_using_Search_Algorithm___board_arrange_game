@@ -5,8 +5,7 @@ import java.util.Scanner;
 public class main {
     public static void main(String[] args) throws IOException {
       Game_Board board_information = get_board_information();
-      Search_Algorithms search_algo = new Search_Algorithms(board_information);
-      search_algo.BFS();
+      run_algorithm(board_information);
     }
     public static Game_Board get_board_information()
     {
@@ -63,5 +62,24 @@ public class main {
         }
      Game_Board board_information = new Game_Board(algorithm_name,open,board_size,current_state,goal_state);
         return board_information;
+    }
+    public static void run_algorithm(Game_Board board ) throws IOException {
+        Search_Algorithms search_algo = new Search_Algorithms(board);
+        switch(board.getAlgo_Name()) {
+            case "BFS":
+                search_algo.BFS();
+                break;
+            case "DFID":
+                search_algo.DFID();
+                break;
+            case "A*":
+                break;
+            case "IDA*":
+                break;
+            case "DFBnB":
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -22,7 +22,6 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
     }
     public Game_Node_State(Game_Node_State prev_node, Direction direct, int board_size, int row , int col){
-        char temp_char;
         this.Path ="";
         this.Board_size = board_size;
         this.Current_State = new char[board_size][board_size];
@@ -31,25 +30,23 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
                 this.Current_State[i][j] = prev_node.getCurrent_state()[i][j];
             }
         }
-        temp_char = this.Current_State[row][col];
         set_board_state(row,col,direct,prev_node);
 
     }
     private void set_board_state(int row, int col,Direction direct,Game_Node_State prev_node)
     {
-        int current_cost =0;
         String current_move="";
         switch(direct) {
             case UP:
 
                 this.Current_State[row][col] = this.Current_State[row-1][col];
                 this.Current_State[row-1][col] = '_';
-                current_move = "(" +(row+2) +"," + (col+1)  + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
+                current_move = "(" +(row) +"," + (col+1)  + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
                 break;
             case DOWN:
                 this.Current_State[row][col] = this.Current_State[row+1][col];
                 this.Current_State[row+1][col] = '_';
-                current_move = "(" + (row) +"," + (col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
+                current_move = "(" + (row+2) +"," + (col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
                 break;
             case LEFT:
                 this.Current_State[row][col] = this.Current_State[row][col-1];

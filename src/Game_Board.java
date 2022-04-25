@@ -6,11 +6,9 @@ public class Game_Board {
     private int Board_Size;
     private Game_Node_State First_State;
     private Game_Node_State Goal_State;
-    private int Node_counter;
 
     public Game_Board(String Algo_name, String Print_Info, String Board_Size, String Board_State, String Goal_State){
         this.Algo_Name = Algo_name;
-        this.Node_counter=0;
         if(Board_Size.equals("small"))
         {
             this.Board_Size = 3;
@@ -52,11 +50,11 @@ public class Game_Board {
     }
 
 
-    public int getNode_counter() {
-        return Node_counter;
+
+
+    public void setGoal_State(Game_Node_State goal_State) {
+        Goal_State = goal_State;
     }
 
-    public void add_Node_counter(int node_counter) {
-        this.Node_counter += node_counter;
-    }
+
 }
