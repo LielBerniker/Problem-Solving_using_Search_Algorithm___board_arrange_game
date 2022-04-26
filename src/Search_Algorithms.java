@@ -116,6 +116,51 @@ public class Search_Algorithms {
 
             }
         }
+        public void A_STAR() throws IOException {
+
+            this.setElapsedTime(System.currentTimeMillis());
+            Game_Node_State start_node,goal_node,current_node_state;
+            start_node = this.board.getFirst_State();
+            goal_node = this.board.getGoal_State();
+
+            Queue<Game_Node_State> all_states = new ArrayDeque<>();
+            Hashtable<String,Game_Node_State> frontier_nodes = new Hashtable<>();
+
+            Hashtable<String,Game_Node_State> explored_nodes = new Hashtable<>();
+
+            all_states.add(start_node);
+            frontier_nodes.put(start_node.get_node_unique_key(),start_node);
+
+            while(!all_states.isEmpty())
+            {
+                current_node_state = all_states.poll();
+                frontier_nodes.remove(current_node_state);
+                if(current_node_state.equals(goal_node))
+                {
+
+                    long start  = this.getElapsedTime();
+                    this.setElapsedTime(System.currentTimeMillis() -start);
+                    this.board.setGoal_State(current_node_state);
+                    create_output(true);
+                    return;
+                }
+                explored_nodes.put(current_node_state.get_node_unique_key(),current_node_state);
+                List<Game_Node_State> all_possible_children = this.find_all_children_A_STAR(current_node_state, frontier_nodes,all_states);
+                this.addNode_counter(all_possible_children.size());
+                for (Game_Node_State current_child:all_possible_children) {
+                    if((!explored_nodes.containsKey(current_child.get_node_unique_key())))
+                    {
+
+                        all_states.add(current_child);
+                        frontier_nodes.put(current_child.get_node_unique_key(),current_child);
+
+                    }
+                }
+            }
+            long start  = this.getElapsedTime();
+            this.setElapsedTime(System.currentTimeMillis() -start);
+            create_output(false);
+        }
 
 
     public List<Game_Node_State> find_all_children(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes)
@@ -154,7 +199,65 @@ public class Search_Algorithms {
         }
        return possible_children;
     }
+    public List<Game_Node_State> find_all_children_A_STAR(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes,Queue<Game_Node_State> all_states)
+    {
+        int size = this.board.getBoard_Size();
+        List<Game_Node_State> possible_children = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if(current_node.is_empty_block(i,j) ) {
+                    if (current_node.can_move_ball_from_above(i, j)) {
+                        Game_Node_State current_node_state_up = new Game_Node_State(current_node, Direction.UP, size, i, j);
+                        if (!frontier_nodes.containsKey(current_node_state_up.get_node_unique_key())) {
+                            possible_children.add(current_node_state_up);
+                        } else {
+                            check_better_node(current_node_state_up, frontier_nodes, all_states);
+                        }
+                    }
 
+                    if(current_node.can_move_ball_from_below(i,j))
+                    {
+                        Game_Node_State current_node_state_down = new Game_Node_State(current_node,Direction.DOWN,size,i,j);
+                        if(!frontier_nodes.containsKey(current_node_state_down.get_node_unique_key()))
+                        {possible_children.add(current_node_state_down);}
+                        else{check_better_node(current_node_state_down,frontier_nodes,all_states); }
+                    }
+
+                    if(current_node.can_move_ball_from_the_right(i,j))
+                    {
+                        Game_Node_State current_node_state_right = new Game_Node_State(current_node,Direction.RIGHT,size,i,j);
+                        if(!frontier_nodes.containsKey(current_node_state_right.get_node_unique_key()))
+                        {possible_children.add(current_node_state_right);}
+                        else{check_better_node(current_node_state_right,frontier_nodes,all_states); }
+                    }
+
+                    if(current_node.can_move_ball_from_the_left(i,j))
+                    {
+                        Game_Node_State current_node_state_left = new Game_Node_State(current_node,Direction.LEFT,size,i,j);
+                        if(!frontier_nodes.containsKey(current_node_state_left.get_node_unique_key()))
+                        {possible_children.add(current_node_state_left);}
+                        else{check_better_node(current_node_state_left,frontier_nodes,all_states); }
+                    }
+
+                    }
+                  }
+            }
+
+        return possible_children;
+    }
+    public void check_better_node(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes,Queue<Game_Node_State> all_states)
+    {
+        Game_Node_State old_node = frontier_nodes.get(current_node.get_node_unique_key());
+
+        //if child.f() > olderChild.f()
+    /*    if( old_node > current_node )*/
+        if(1==1){
+            // replace child and olderChild
+            all_states.remove(old_node);
+            all_states.add(current_node);
+            frontier_nodes.put(current_node.get_node_unique_key(), current_node);
+    }
+    }
     public int getNode_counter() {
         return node_counter;
     }
