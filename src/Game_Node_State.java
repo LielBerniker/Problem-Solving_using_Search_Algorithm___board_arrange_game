@@ -2,94 +2,101 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Game_Node_State implements Comparable<Game_Node_State>{
-    private char[][] Current_State;
-    private String Path;
-    private int Board_size;
-    private int Cost;
+    private char[][] current_State;
+    private String path;
+    Game_Node_State prev_node;
+    private int board_size;
+    private int cost;
+    private int heuristic;
 
 
     public Game_Node_State(String cur_state, int board_size){
-        this.Current_State = new char[board_size][board_size];
-        this.Path ="";
-        this.Cost =0;
-        this.Board_size = board_size;
+        this.current_State = new char[board_size][board_size];
+        this.path="";
+        this.heuristic = 0;
+        this.prev_node = null;
+        this.cost =0;
+        this.board_size = board_size;
         int k =0;
-        for (int i = 0; i < this.Board_size; i++) {
-            for (int j = 0; j < this.Board_size; j++) {
-                this.Current_State[i][j] = cur_state.charAt(k);
+        for (int i = 0; i < this.board_size; i++) {
+            for (int j = 0; j < this.board_size; j++) {
+                this.current_State[i][j] = cur_state.charAt(k);
                 k = k+2;
             }
         }
     }
     public Game_Node_State(Game_Node_State prev_node, Direction direct, int board_size, int row , int col){
-        this.Path ="";
-        this.Board_size = board_size;
-        this.Current_State = new char[board_size][board_size];
-        for (int i = 0; i < this.Board_size; i++) {
-            for (int j = 0; j < this.Board_size; j++) {
-                this.Current_State[i][j] = prev_node.getCurrent_state()[i][j];
+        this.board_size = board_size;
+        this.heuristic = 0;
+        this.prev_node = prev_node;
+        this.current_State = new char[board_size][board_size];
+        for (int i = 0; i < this.board_size; i++) {
+            for (int j = 0; j < this.board_size; j++) {
+                this.current_State[i][j] = prev_node.getCurrent_state()[i][j];
             }
         }
-        set_board_state(row,col,direct,prev_node);
+        setBoard_state(row,col,direct,prev_node);
 
     }
-    private void set_board_state(int row, int col,Direction direct,Game_Node_State prev_node)
+    private void setBoard_state(int row, int col,Direction direct,Game_Node_State prev_node)
     {
-        String current_move="";
+        char current_ball;
         switch(direct) {
             case UP:
-
-                this.Current_State[row][col] = this.Current_State[row-1][col];
-                this.Current_State[row-1][col] = '_';
-                current_move = "(" +(row) +"," + (col+1)  + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
+                this.current_State[row][col] = this.current_State[row-1][col];
+                this.current_State[row-1][col] = '_';
+                current_ball = this.current_State[row][col];
+                this.path = "(" +(row) +"," + (col+1)  + "):" + current_ball+ ":("+ (row+1) +"," +(col+1) +")--";
                 break;
             case DOWN:
-                this.Current_State[row][col] = this.Current_State[row+1][col];
-                this.Current_State[row+1][col] = '_';
-                current_move = "(" + (row+2) +"," + (col+1) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
+                this.current_State[row][col] = this.current_State[row+1][col];
+                this.current_State[row+1][col] = '_';
+                current_ball = this.current_State[row][col];
+                this.path="(" + (row+2) +"," + (col+1) + "):" +current_ball + ":("+ (row+1) +"," +(col+1) +")--";
                 break;
             case LEFT:
-                this.Current_State[row][col] = this.Current_State[row][col-1];
-                this.Current_State[row][col-1] = '_';
-                current_move = "(" + (row+1) +"," + (col) + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
+                this.current_State[row][col] = this.current_State[row][col-1];
+                this.current_State[row][col-1] = '_';
+                current_ball = this.current_State[row][col];
+                this.path="(" + (row+1) +"," + (col) + "):" + current_ball+ ":("+ (row+1) +"," +(col+1) +")--";
                 break;
             case RIGHT:
-                this.Current_State[row][col] = this.Current_State[row][col+1];
-                this.Current_State[row][col+1] = '_';
-                current_move = "(" + (row+1) +"," + (col+2)  + "):" + this.Current_State[row][col]+ ":("+ (row+1) +"," +(col+1) +")--" ;
+                this.current_State[row][col] = this.current_State[row][col+1];
+                this.current_State[row][col+1] = '_';
+                current_ball = this.current_State[row][col];
+                this.path="(" + (row+1) +"," + (col+2)  + "):" + current_ball+ ":("+ (row+1) +"," +(col+1) +")--";
                 break;
             default:
                 break;
         }
-        this.Cost = prev_node.Cost+ get_cost_by_color(this.Current_State[row][col]);
-        this.Path = prev_node.getPath() + current_move;
+        this.cost = prev_node.cost+ getCost_by_color(this.current_State[row][col]);
 
     }
-    public boolean can_move_ball_from_above(int row, int col)
+    public boolean canMoveBallFromAbove(int row, int col)
     {
       if( row-1<0  || this.getCurrent_state()[row-1][col]=='_')
           return false;
       return true;
     }
-    public boolean can_move_ball_from_below(int row, int col)
+    public boolean canMoveBallFromBelow(int row, int col)
     {
-        if(row+1>=this.Board_size|| this.getCurrent_state()[row+1][col]=='_')
+        if(row+1>=this.board_size|| this.getCurrent_state()[row+1][col]=='_')
             return false;
         return true;
     }
-    public boolean can_move_ball_from_the_right(int row,int col)
+    public boolean canMoveBallFromRight(int row,int col)
     {
-        if(col+1>=this.Board_size || this.getCurrent_state()[row][col+1]=='_')
+        if(col+1>=this.board_size || this.getCurrent_state()[row][col+1]=='_')
             return false;
         return true;
     }
-    public boolean can_move_ball_from_the_left(int row,int col)
+    public boolean canMoveBallFromLeft(int row,int col)
     {
         if(col-1<0 || this.getCurrent_state()[row][col-1]=='_')
             return false;
         return true;
     }
-    private int get_cost_by_color(char color)
+    private int getCost_by_color(char color)
     {
         int score=0;
         switch(color) {
@@ -108,31 +115,47 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
         return score;
     }
-    public boolean is_empty_block(int row, int col)
+    public boolean isBlock_empty(int row, int col)
     {
         if(this.getCurrent_state()[row][col] == '_')
         {return true;}
         return false;
     }
-   public String get_node_unique_key()
+   public String getNode_unique_key()
    {
        return Arrays.deepToString(this.getCurrent_state());
    }
 
     public int getBoard_size() {
-        return Board_size;
+        return board_size;
     }
 
     public char[][] getCurrent_state() {
-        return this.Current_State;
+        return this.current_State;
+    }
+
+    public int getHeuristic() {
+        return heuristic;
+    }
+
+    public void setHeuristic(int heuristic) {
+        this.heuristic = heuristic;
+    }
+
+    public Game_Node_State getPrev_node() {
+        return prev_node;
+    }
+
+    public void setPrev_node(Game_Node_State prev_node) {
+        this.prev_node = prev_node;
     }
 
     public String getPath() {
-        return this.Path;
+        return this.path;
     }
 
     public int getCost() {
-        return this.Cost;
+        return this.cost;
     }
     @Override
     public boolean equals(Object o)
@@ -160,5 +183,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     @Override
     public int compareTo(Game_Node_State o) {
         return 0;
+    }
+    @Override
+    public String toString(){
+        return  Arrays.deepToString(this.current_State)+"  #"+this.cost+ this.heuristic;
     }
 }

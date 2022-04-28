@@ -1,13 +1,17 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-public class main {
+public class Ex1 {
+    static Game_Board board;
+    static Search_Algorithms algorithm;
+    static StringBuilder full_path;
+    static Game_Node_State last_node;
     public static void main(String[] args) throws IOException {
-      Game_Board board_information = get_board_information();
-      run_algorithm(board_information);
+      run_algorithm();
     }
-    public static Game_Board get_board_information()
+    public static void get_board_information()
     {
         Scanner scanner = null;
         int line_count = 0,cur_size;
@@ -60,26 +64,53 @@ public class main {
             }
             line_count++;
         }
-     Game_Board board_information = new Game_Board(algorithm_name,open,board_size,current_state,goal_state);
-        return board_information;
+     board = new Game_Board(algorithm_name,open,board_size,current_state,goal_state);
     }
-    public static void run_algorithm(Game_Board board ) throws IOException {
-        Search_Algorithms search_algo = new Search_Algorithms(board);
-        switch(board.getAlgo_Name()) {
-            case "BFS":
-                search_algo.BFS();
-                break;
-            case "DFID":
-                search_algo.DFID();
-                break;
-            case "A*":
-                break;
-            case "IDA*":
-                break;
-            case "DFBnB":
-                break;
-            default:
-                break;
+    private static void run_algorithm() throws IOException {
+        get_board_information();
+        algorithm = new Search_Algorithms(board);
+        last_node = algorithm.runAlgorithem();
+        findPath();
+        createOutput();
+    }
+    private static void findPath()
+    {
+        Game_Node_State current_node;
+        full_path = new StringBuilder();
+        if(!algorithm.isFind_goal())
+        {
+           full_path.append("no path");
+        }
+        else {
+            current_node = last_node;
+            while(current_node.getPrev_node()!=null)
+            {
+                 full_path.insert(0,current_node.getPath());
+                 current_node = current_node.getPrev_node();
+            }
+            full_path.deleteCharAt(full_path.length()-1);
+            full_path.deleteCharAt(full_path.length()-1);
         }
     }
+    private static void createOutput() throws IOException {
+        boolean find_goal = algorithm.isFind_goal();
+        String cost = "";
+        if(find_goal==false)
+        {
+            cost = "inf";
+        }
+        else {
+            cost = String.valueOf(last_node.getCost());
+        }
+        String all_info = full_path + "\nNum: " + algorithm.getNode_counter() + "\nCost: " + cost + "\n" + (algorithm.getElapsedTime() / 1000F) + " seconds\n";
+        try {
+            FileWriter myWriter = new FileWriter("output.txt");
+            myWriter.write(all_info);
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
 }

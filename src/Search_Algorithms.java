@@ -11,18 +11,39 @@ enum Result_DFS{
 public class Search_Algorithms {
     private Game_Board board;
     private int node_counter;
+    private long elapsed_time;
+    private boolean find_goal;
     private static final int MAX_VAL = Integer.MAX_VALUE;
-    private long elapsedTime;
 
     public Search_Algorithms(Game_Board board)
     {
-        this.elapsedTime = 0;
+        this.find_goal = false;
+        this.elapsed_time = 0;
         this.node_counter = 0;
         this.board = board;
     }
+    public Game_Node_State runAlgorithem()
+    {
+    String algo = this.board.getAlgo_Name();
+    Game_Node_State final_node=null;
+        switch(algo) {
+            case "BFS":
+                final_node = this.BFS();
+                break;
+            case"DFID":
+                final_node = this.DFID();
+                break;
+            case"A*":
+                final_node = this.A_STAR();
+                break;
+            default:
+                break;
+        }
+      return final_node;
+    }
 
-    public void BFS() throws IOException {
-        this.setElapsedTime(System.currentTimeMillis());
+    private Game_Node_State BFS() {
+        setTime(0);
         Game_Node_State start_node,goal_node,current_node_state;
         start_node = this.board.getFirst_State();
         goal_node = this.board.getGoal_State();
@@ -31,61 +52,55 @@ public class Search_Algorithms {
         Hashtable<String,Game_Node_State> explored_nodes = new Hashtable<>();
 
         all_states.add(start_node);
-        frontier_nodes.put(start_node.get_node_unique_key(),start_node);
+        frontier_nodes.put(start_node.getNode_unique_key(),start_node);
 
         while(!all_states.isEmpty())
         {
             current_node_state = all_states.poll();
 
-            explored_nodes.put(current_node_state.get_node_unique_key(),current_node_state);
-            List<Game_Node_State> all_possible_children = this.find_all_children(current_node_state, frontier_nodes);
+            explored_nodes.put(current_node_state.getNode_unique_key(),current_node_state);
+            List<Game_Node_State> all_possible_children = this.findAll_children(current_node_state, frontier_nodes);
             this.addNode_counter(all_possible_children.size());
             for (Game_Node_State current_child:all_possible_children ) {
-                if((!explored_nodes.containsKey(current_child.get_node_unique_key())))
+                if((!explored_nodes.containsKey(current_child.getNode_unique_key())))
                 {
                     if(current_child.equals(goal_node))
                     {
-
-                        long start  = this.getElapsedTime();
-                        this.setElapsedTime(System.currentTimeMillis() -start);
-                        this.board.setGoal_State(current_child);
-                        create_output(true);
-                        return;
+                        setTime(this.getElapsedTime());
+                        this.setFind_goal(true);
+                        return current_child;
                     }
                     all_states.add(current_child);
-                    frontier_nodes.put(current_child.get_node_unique_key(),current_child);
+                    frontier_nodes.put(current_child.getNode_unique_key(),current_child);
 
                 }
             }
         }
-        long start  = this.getElapsedTime();
-        this.setElapsedTime(System.currentTimeMillis() -start);
-        create_output(false);
+        setTime(this.getElapsedTime());
+        return this.board.getFirst_State();
     }
-    public void DFID() throws IOException {
+    private Game_Node_State DFID() {
         Game_Node_State start_node,goal_node;
         start_node = this.board.getFirst_State();
         goal_node = this.board.getGoal_State();
-        this.setElapsedTime(System.currentTimeMillis());
+        setTime(0);
         for (int i = 0; i <MAX_VAL; i++) {
             Hashtable<String, Game_Node_State> frontier_nodes = new Hashtable<>();
-            Result_DFS limited_dfs_results = Limited_DFS(start_node,goal_node,i,frontier_nodes);
+            Result_DFS limited_dfs_results = LimitedDFS(start_node,goal_node,i,frontier_nodes);
             if(limited_dfs_results != Result_DFS.CUTOFF)
             {
                 if(limited_dfs_results == Result_DFS.GOAL)
                 {
-                    long start  = this.getElapsedTime();
-                    this.setElapsedTime(System.currentTimeMillis() -start);
-                    create_output(true);
-                    return;
+                    setTime(this.getElapsedTime());
+                    this.setFind_goal(true);
+                    return this.board.getGoal_State();
                 }
             }
         }
-        long start  = this.getElapsedTime();
-        this.setElapsedTime(System.currentTimeMillis() -start);
-        create_output(false);
+        setTime(this.getElapsedTime());
+        return this.board.getGoal_State();
     }
-    public Result_DFS Limited_DFS(Game_Node_State current_node,Game_Node_State goal_node,int limit,Hashtable<String,Game_Node_State> frontier_nodes ) throws IOException {
+    private Result_DFS LimitedDFS(Game_Node_State current_node,Game_Node_State goal_node,int limit,Hashtable<String,Game_Node_State> frontier_nodes ) {
         if(current_node.equals(goal_node))
         {
             this.board.setGoal_State(current_node);
@@ -97,12 +112,12 @@ public class Search_Algorithms {
         }
         else
         {
-            frontier_nodes.put(current_node.get_node_unique_key(),current_node);
+            frontier_nodes.put(current_node.getNode_unique_key(),current_node);
             boolean is_cutoff = false;
-            List<Game_Node_State> all_possible_children = this.find_all_children(current_node, frontier_nodes);
+            List<Game_Node_State> all_possible_children = this.findAll_children(current_node, frontier_nodes);
             for (Game_Node_State current_child:all_possible_children) {
                  this.addNode_counter(1);
-                 Result_DFS result = Limited_DFS(current_child,goal_node,limit-1,frontier_nodes);
+                 Result_DFS result = LimitedDFS(current_child,goal_node,limit-1,frontier_nodes);
                  if(result == Result_DFS.CUTOFF)
                      is_cutoff = true;
                  else if(result !=Result_DFS.FAIL)
@@ -116,10 +131,10 @@ public class Search_Algorithms {
 
             }
         }
-        public void A_STAR() throws IOException {
+        private Game_Node_State A_STAR() {
 
             this.setElapsedTime(System.currentTimeMillis());
-            Game_Node_State start_node,goal_node,current_node_state;
+            Game_Node_State start_node,goal_node,current_node;
             start_node = this.board.getFirst_State();
             goal_node = this.board.getGoal_State();
 
@@ -129,114 +144,111 @@ public class Search_Algorithms {
             Hashtable<String,Game_Node_State> explored_nodes = new Hashtable<>();
 
             all_states.add(start_node);
-            frontier_nodes.put(start_node.get_node_unique_key(),start_node);
+            frontier_nodes.put(start_node.getNode_unique_key(),start_node);
 
             while(!all_states.isEmpty())
             {
-                current_node_state = all_states.poll();
-                frontier_nodes.remove(current_node_state);
-                if(current_node_state.equals(goal_node))
+                current_node = all_states.poll();
+                frontier_nodes.remove(current_node);
+                if(current_node.equals(goal_node))
                 {
 
-                    long start  = this.getElapsedTime();
-                    this.setElapsedTime(System.currentTimeMillis() -start);
-                    this.board.setGoal_State(current_node_state);
-                    create_output(true);
-                    return;
+                    setTime(this.getElapsedTime());
+                    this.setFind_goal(true);
+                    return current_node;
                 }
-                explored_nodes.put(current_node_state.get_node_unique_key(),current_node_state);
-                List<Game_Node_State> all_possible_children = this.find_all_children_A_STAR(current_node_state, frontier_nodes,all_states);
+                explored_nodes.put(current_node.getNode_unique_key(),current_node);
+                List<Game_Node_State> all_possible_children = this.findAll_children_A_STAR(current_node, frontier_nodes,all_states);
                 this.addNode_counter(all_possible_children.size());
                 for (Game_Node_State current_child:all_possible_children) {
-                    if((!explored_nodes.containsKey(current_child.get_node_unique_key())))
+                    if((!explored_nodes.containsKey(current_child.getNode_unique_key())))
                     {
 
                         all_states.add(current_child);
-                        frontier_nodes.put(current_child.get_node_unique_key(),current_child);
+                        frontier_nodes.put(current_child.getNode_unique_key(),current_child);
 
                     }
                 }
             }
-            long start  = this.getElapsedTime();
-            this.setElapsedTime(System.currentTimeMillis() -start);
-            create_output(false);
+            setTime(this.getElapsedTime());
+            return this.board.getGoal_State();
         }
 
 
-    public List<Game_Node_State> find_all_children(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes)
+    private List<Game_Node_State> findAll_children(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes)
     {
         int size = this.board.getBoard_Size();
         List<Game_Node_State> possible_children = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if(current_node.is_empty_block(i,j) )
+                if(current_node.isBlock_empty(i,j) )
                 {
-                    if(current_node.can_move_ball_from_above(i,j))
+                    if(current_node.canMoveBallFromAbove(i,j))
                     {
                         Game_Node_State current_node_state_up = new Game_Node_State(current_node,Direction.UP,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_up.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_up.getNode_unique_key()))
                         {possible_children.add(current_node_state_up);}
                     }
-                    if(current_node.can_move_ball_from_below(i,j))
+                    if(current_node.canMoveBallFromBelow(i,j))
                     {
                         Game_Node_State current_node_state_down = new Game_Node_State(current_node,Direction.DOWN,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_down.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_down.getNode_unique_key()))
                         {possible_children.add(current_node_state_down);}
                     }
-                    if(current_node.can_move_ball_from_the_right(i,j))
+                    if(current_node.canMoveBallFromRight(i,j))
                     {
                         Game_Node_State current_node_state_right = new Game_Node_State(current_node,Direction.RIGHT,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_right.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_right.getNode_unique_key()))
                         {possible_children.add(current_node_state_right);}
                     }
-                    if(current_node.can_move_ball_from_the_left(i,j))
+                    if(current_node.canMoveBallFromLeft(i,j))
                     {
                         Game_Node_State current_node_state_left = new Game_Node_State(current_node,Direction.LEFT,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_left.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_left.getNode_unique_key()))
                         {possible_children.add(current_node_state_left);}
                     }}
             }
         }
        return possible_children;
     }
-    public List<Game_Node_State> find_all_children_A_STAR(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes,Queue<Game_Node_State> all_states)
+    private List<Game_Node_State> findAll_children_A_STAR(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes,Queue<Game_Node_State> all_states)
     {
         int size = this.board.getBoard_Size();
         List<Game_Node_State> possible_children = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if(current_node.is_empty_block(i,j) ) {
-                    if (current_node.can_move_ball_from_above(i, j)) {
+                if(current_node.isBlock_empty(i,j) ) {
+                    if (current_node.canMoveBallFromAbove(i, j)) {
                         Game_Node_State current_node_state_up = new Game_Node_State(current_node, Direction.UP, size, i, j);
-                        if (!frontier_nodes.containsKey(current_node_state_up.get_node_unique_key())) {
+                        if (!frontier_nodes.containsKey(current_node_state_up.getNode_unique_key())) {
                             possible_children.add(current_node_state_up);
                         } else {
-                            check_better_node(current_node_state_up, frontier_nodes, all_states);
+                            checkBetter_node(current_node_state_up, frontier_nodes, all_states);
                         }
                     }
 
-                    if(current_node.can_move_ball_from_below(i,j))
+                    if(current_node.canMoveBallFromBelow(i,j))
                     {
                         Game_Node_State current_node_state_down = new Game_Node_State(current_node,Direction.DOWN,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_down.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_down.getNode_unique_key()))
                         {possible_children.add(current_node_state_down);}
-                        else{check_better_node(current_node_state_down,frontier_nodes,all_states); }
+                        else{checkBetter_node(current_node_state_down,frontier_nodes,all_states); }
                     }
 
-                    if(current_node.can_move_ball_from_the_right(i,j))
+                    if(current_node.canMoveBallFromRight(i,j))
                     {
                         Game_Node_State current_node_state_right = new Game_Node_State(current_node,Direction.RIGHT,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_right.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_right.getNode_unique_key()))
                         {possible_children.add(current_node_state_right);}
-                        else{check_better_node(current_node_state_right,frontier_nodes,all_states); }
+                        else{checkBetter_node(current_node_state_right,frontier_nodes,all_states); }
                     }
 
-                    if(current_node.can_move_ball_from_the_left(i,j))
+                    if(current_node.canMoveBallFromLeft(i,j))
                     {
                         Game_Node_State current_node_state_left = new Game_Node_State(current_node,Direction.LEFT,size,i,j);
-                        if(!frontier_nodes.containsKey(current_node_state_left.get_node_unique_key()))
+                        if(!frontier_nodes.containsKey(current_node_state_left.getNode_unique_key()))
                         {possible_children.add(current_node_state_left);}
-                        else{check_better_node(current_node_state_left,frontier_nodes,all_states); }
+                        else{checkBetter_node(current_node_state_left,frontier_nodes,all_states); }
                     }
 
                     }
@@ -245,9 +257,9 @@ public class Search_Algorithms {
 
         return possible_children;
     }
-    public void check_better_node(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes,Queue<Game_Node_State> all_states)
+    private void checkBetter_node(Game_Node_State current_node,Hashtable<String,Game_Node_State> frontier_nodes,Queue<Game_Node_State> all_states)
     {
-        Game_Node_State old_node = frontier_nodes.get(current_node.get_node_unique_key());
+        Game_Node_State old_node = frontier_nodes.get(current_node.getNode_unique_key());
 
         //if child.f() > olderChild.f()
     /*    if( old_node > current_node )*/
@@ -255,7 +267,7 @@ public class Search_Algorithms {
             // replace child and olderChild
             all_states.remove(old_node);
             all_states.add(current_node);
-            frontier_nodes.put(current_node.get_node_unique_key(), current_node);
+            frontier_nodes.put(current_node.getNode_unique_key(), current_node);
     }
     }
     public int getNode_counter() {
@@ -267,34 +279,26 @@ public class Search_Algorithms {
     }
 
     public long getElapsedTime() {
-        return elapsedTime;
+        return elapsed_time;
     }
 
-    public void setElapsedTime(long elapsedTime) {
-        this.elapsedTime = elapsedTime;
+    public boolean isFind_goal() {
+        return find_goal;
     }
 
-    public void create_output( boolean find_goal ) throws IOException {
-        String balls_movement = "";
-        String cost = "";
-        if(find_goal==false)
-        {
-             balls_movement = "no path";
-             cost = "inf";
-        }
-        else {
-            String path = this.board.getGoal_State().getPath();
-            balls_movement = path.substring(0, path.length() - 2);
-            cost = String.valueOf(this.board.getGoal_State().getCost());
-        }
-        String all_info = balls_movement + "\nNum: " + this.getNode_counter() + "\nCost: " + cost + "\n" + (this.getElapsedTime() / 1000F) + " seconds\n";
-        try {
-            FileWriter myWriter = new FileWriter("output.txt");
-            myWriter.write(all_info);
-            myWriter.close();
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+    public void setFind_goal(boolean find_goal) {
+        this.find_goal = find_goal;
     }
+
+    private void setElapsedTime(long elapsedTime) {
+        this.elapsed_time = elapsedTime;
+    }
+
+    private void setTime(long start)
+    {
+        long current_time = System.currentTimeMillis() -start;
+        this.setElapsedTime(current_time);
+    }
+
+
 }
