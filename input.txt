@@ -1,5 +1,5 @@
-DFID
-no open
+BFS
+with open
 small
 R,R,_
 B,B,_

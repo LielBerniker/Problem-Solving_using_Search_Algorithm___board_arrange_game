@@ -1,18 +1,25 @@
+import java.awt.*;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Game_Node_State implements Comparable<Game_Node_State>{
     private char[][] current_State;
     private String path;
+    private int depth;
     Game_Node_State prev_node;
     private int board_size;
     private int cost;
     private int heuristic;
+    private int iteration;
 
 
     public Game_Node_State(String cur_state, int board_size){
         this.current_State = new char[board_size][board_size];
         this.path="";
+        this.depth=0;
+        this.iteration =0;
         this.heuristic = 0;
         this.prev_node = null;
         this.cost =0;
@@ -28,7 +35,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     public Game_Node_State(Game_Node_State prev_node, Direction direct, int board_size, int row , int col){
         this.board_size = board_size;
         this.heuristic = 0;
+        this.iteration =0;
         this.prev_node = prev_node;
+        this.depth = prev_node.getDepth()+1;
         this.current_State = new char[board_size][board_size];
         for (int i = 0; i < this.board_size; i++) {
             for (int j = 0; j < this.board_size; j++) {
@@ -96,7 +105,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
             return false;
         return true;
     }
-    private int getCost_by_color(char color)
+    public int getCost_by_color(char color)
     {
         int score=0;
         switch(color) {
@@ -121,6 +130,31 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         {return true;}
         return false;
     }
+    public Point[] findBalls_location_by_color(char current_color)
+    {
+        int size = this.getBoard_size();
+        int balls_amount,i=0;
+        if(size == 3)
+        {
+           balls_amount = 2;
+        }
+        else{
+            balls_amount = 3;
+        }
+        Point[] balls_location = new Point[balls_amount];
+        for (int row = 0; row <this.getBoard_size(); row++) {
+            for (int col = 0; col <this.getBoard_size() ; col++) {
+                if(this.getCurrent_state()[row][col] == current_color)
+                {
+                    Point ball_location = new Point(row,col);
+                    balls_location[i]=ball_location;
+                    i++;
+                }
+            }
+        }
+        return balls_location;
+    }
+
    public String getNode_unique_key()
    {
        return Arrays.deepToString(this.getCurrent_state());
@@ -140,6 +174,22 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
 
     public void setHeuristic(int heuristic) {
         this.heuristic = heuristic;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public int getIteration() {
+        return iteration;
+    }
+
+    public void setIteration(int iteration) {
+        this.iteration = iteration;
     }
 
     public Game_Node_State getPrev_node() {
@@ -180,12 +230,44 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
         return true;
     }
+    public boolean currentIs_bigger(Game_Node_State o)
+    {
+        if(compareTo(o)==1)
+        {
+            return true;
+        }
+        return false;
+    }
+    private int f_n()
+    {
+        return this.cost+this.heuristic;
+    }
     @Override
     public int compareTo(Game_Node_State o) {
-        return 0;
+        if(this.f_n()>o.f_n())
+        {
+            return 1;
+        }
+        else if(this.f_n()<o.f_n())
+        {
+            return -1;
+        }
+        else{
+            if(this.getIteration()>o.getIteration())
+            {
+                return 1;
+            }
+            else if(this.getIteration()>o.getIteration())
+            {
+                return -1;
+            }
+            else{
+                return 1;
+            }
+        }
     }
     @Override
     public String toString(){
-        return  Arrays.deepToString(this.current_State)+"  #"+this.cost+ this.heuristic;
+        return " <- " + Arrays.deepToString(this.current_State)+"  #"+this.cost+" "+ this.heuristic;
     }
 }
