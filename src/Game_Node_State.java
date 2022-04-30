@@ -13,6 +13,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     private int cost;
     private int heuristic;
     private int iteration;
+    private boolean out;
 
 
     public Game_Node_State(String cur_state, int board_size){
@@ -23,6 +24,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         this.heuristic = 0;
         this.prev_node = null;
         this.cost =0;
+        this.out = false;
         this.board_size = board_size;
         int k =0;
         for (int i = 0; i < this.board_size; i++) {
@@ -36,6 +38,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         this.board_size = board_size;
         this.heuristic = 0;
         this.iteration =0;
+        this.out = false;
         this.prev_node = prev_node;
         this.depth = prev_node.getDepth()+1;
         this.current_State = new char[board_size][board_size];
@@ -200,6 +203,14 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         this.prev_node = prev_node;
     }
 
+    public boolean isOut() {
+        return out;
+    }
+
+    public void setOut(boolean out) {
+        this.out = out;
+    }
+
     public String getPath() {
         return this.path;
     }
@@ -238,7 +249,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         }
         return false;
     }
-    private int f_n()
+    public int f_n()
     {
         return this.cost+this.heuristic;
     }
