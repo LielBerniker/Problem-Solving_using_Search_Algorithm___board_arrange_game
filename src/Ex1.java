@@ -69,7 +69,7 @@ public class Ex1 {
     private static void run_algorithm() throws IOException {
         get_board_information();
         algorithm = new Search_Algorithms(board);
-        last_node = algorithm.runAlgorithem();
+        last_node = algorithm.runAlgorithm();
         findPath();
         createOutput();
     }

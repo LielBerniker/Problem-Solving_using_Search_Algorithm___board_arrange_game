@@ -34,7 +34,7 @@ public class Search_Algorithms {
         this.board = board;
     }
 
-    public Game_Node_State runAlgorithem() {
+    public Game_Node_State runAlgorithm() {
         String algo = this.board.getAlgo_Name();
         Game_Node_State final_node = null;
         switch (algo) {
@@ -51,7 +51,7 @@ public class Search_Algorithms {
                 final_node = this.IDA_STAR();
                 break;
             case "DFBnB":
-                final_node = this.A_STAR();
+                final_node = this.DFBnB();
                 break;
             default:
                 break;
@@ -229,46 +229,104 @@ public class Search_Algorithms {
                     for (Game_Node_State current_child : all_possible_children) {
                         this.addNode_counter(1);
                         current_child.setHeuristic(this.calculateHeuristic_value(current_child));
-                        if(current_child.f_n()>threshold)
-                        {
-                           minF = Math.min(minF,current_child.f_n());
-                           continue;
-                        }
-                        Game_Node_State old_node = explored_nodes.get(current_child.getNode_unique_key());
-                        if(old_node != null && old_node.isOut())
-                        {
+                        if (current_child.f_n() > threshold) {
+                            minF = Math.min(minF, current_child.f_n());
                             continue;
                         }
-                        if(old_node != null && (!old_node.isOut()))
-                        {
+                        Game_Node_State old_node = explored_nodes.get(current_child.getNode_unique_key());
+                        if (old_node != null && old_node.isOut()) {
+                            continue;
+                        }
+                        if (old_node != null && (!old_node.isOut())) {
                             old_node.setHeuristic(calculateHeuristic_value(old_node));
-                            if(old_node.getHeuristic() > current_child.getHeuristic())
-                            {
-                              all_states.remove(old_node);
-                              explored_nodes.remove(old_node.getNode_unique_key());
-                            }
-                            else{
+                            if (old_node.getHeuristic() > current_child.getHeuristic()) {
+                                all_states.remove(old_node);
+                                explored_nodes.remove(old_node.getNode_unique_key());
+                            } else {
                                 continue;
                             }
                         }
-                        if(current_child.equals(goal_node))
-                        {
+                        if (current_child.equals(goal_node)) {
                             setTime(this.getElapsedTime());
                             this.setFind_goal(true);
                             return current_child;
                         }
                         all_states.push(current_child);
-                        explored_nodes.put(current_child.getNode_unique_key(),current_child);
+                        explored_nodes.put(current_child.getNode_unique_key(), current_child);
                     }
                 }
             }
             start_node.setOut(false);
-           threshold = minF;
+            threshold = minF;
         }
         setTime(this.getElapsedTime());
         return this.board.getGoal_State();
     }
 
+    private Game_Node_State DFBnB() {
+        this.setElapsedTime(System.currentTimeMillis());
+        Game_Node_State start_node, goal_node, current_node, result ;
+        int threshold, minF;
+        start_node = this.board.getFirst_State();
+        goal_node = this.board.getGoal_State();
+        result = goal_node;
+        Stack<Game_Node_State> all_states = new Stack<>();
+
+        Hashtable<String, Game_Node_State> explored_nodes = new Hashtable<>();
+
+        all_states.push(start_node);
+        explored_nodes.put(start_node.getNode_unique_key(), start_node);
+        threshold = MAX_VAL;
+        while (!all_states.isEmpty()) {
+            openList(all_states);
+            current_node = all_states.pop();
+
+            if (current_node.isOut()) {
+                explored_nodes.remove(current_node.getNode_unique_key());
+            } else {
+                current_node.setOut(true);
+                all_states.push(current_node);
+                List<Game_Node_State> all_possible_children = this.getOrdered_children_by_f(current_node);
+                this.addNode_counter(all_possible_children.size());
+                Iterator<Game_Node_State> child_itr = all_possible_children.iterator();
+                while (child_itr.hasNext()) {
+                    Game_Node_State current_child = child_itr.next();
+                    if (current_child.f_n() >= threshold) {
+                        child_itr.remove();
+                        while ((child_itr.hasNext()) && (all_possible_children.contains(child_itr.next()))) {
+                            child_itr.remove();
+                        }
+                    } else if (explored_nodes.containsKey(current_child.getNode_unique_key())
+                            && explored_nodes.get(current_child.getNode_unique_key()).isOut()) {
+                        child_itr.remove();
+                    } else if (explored_nodes.containsKey(current_child.getNode_unique_key())
+                            && (!explored_nodes.get(current_child.getNode_unique_key()).isOut())) {
+                        Game_Node_State old_child = explored_nodes.get(current_child.getNode_unique_key());
+                        if (old_child.f_n() <= current_child.f_n()) {
+                            child_itr.remove();
+                        } else {
+                            all_states.remove(old_child);
+                            explored_nodes.remove(old_child.getNode_unique_key());
+                        }
+                    } else if (current_child.equals(goal_node)) {
+                        threshold = current_child.f_n();
+                        this.setFind_goal(true);
+                        result = current_child;
+                        while ((child_itr.hasNext()) && (all_possible_children.contains(child_itr.next()))) {
+                            child_itr.remove();
+                        }
+                    }
+                }
+                Collections.reverse(all_possible_children);
+                for (Game_Node_State cur_child : all_possible_children) {
+                    all_states.push(cur_child);
+                    explored_nodes.put(cur_child.getNode_unique_key(),cur_child);
+                }
+            }
+        }
+        setTime(this.getElapsedTime());
+        return result;
+    }
 
 
     private List<Game_Node_State> findAll_children_BFS(Game_Node_State current_node, Hashtable<String, Game_Node_State> frontier_nodes) {
@@ -381,6 +439,15 @@ public class Search_Algorithms {
     private void setTime(long start) {
         long current_time = System.currentTimeMillis() - start;
         this.setElapsedTime(current_time);
+    }
+
+    private List<Game_Node_State> getOrdered_children_by_f(Game_Node_State current_node) {
+        List<Game_Node_State> all_possible_children = this.findAll_children(current_node);
+        for (Game_Node_State current_child : all_possible_children) {
+            current_child.setHeuristic(calculateHeuristic_value(current_child));
+        }
+        Collections.sort(all_possible_children);
+        return all_possible_children;
     }
 
     private int calculateHeuristic_value(Game_Node_State current_node) {
