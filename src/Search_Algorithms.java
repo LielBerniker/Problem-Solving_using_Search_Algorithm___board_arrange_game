@@ -180,7 +180,7 @@ public class Search_Algorithms {
                     all_states.add(current_child);
                     frontier_nodes.put(current_child.getNode_unique_key(), current_child);
                 } else if (frontier_nodes.containsKey(current_child.getNode_unique_key())) {
-                    Game_Node_State old_node = frontier_nodes.get(current_node.getNode_unique_key());
+                    Game_Node_State old_node = frontier_nodes.get(current_child.getNode_unique_key());
 
                     //if child.f() > olderChild.f()
                     if (old_node.currentIs_bigger(current_child)) {

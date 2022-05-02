@@ -142,7 +142,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
            balls_amount = 2;
         }
         else{
-            balls_amount = 3;
+            balls_amount = 4;
         }
         Point[] balls_location = new Point[balls_amount];
         for (int row = 0; row <this.getBoard_size(); row++) {

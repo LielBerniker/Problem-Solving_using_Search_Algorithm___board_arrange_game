@@ -1,4 +1,4 @@
-IDA*
+BFS
 with open
 small
 R,R,_
