@@ -17,7 +17,7 @@ public class Ex1 {
         int line_count = 0,cur_size;
         String algorithm_name="",open="",board_size="",goal_state="",current_state="";
         try {
-            File myObj = new File("input2.txt");
+            File myObj = new File("input.txt");
             scanner = new Scanner(myObj);
         } catch (FileNotFoundException e) {
             e.printStackTrace();

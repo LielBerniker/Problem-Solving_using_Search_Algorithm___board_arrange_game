@@ -1,5 +1,5 @@
-BFS
-with open
+DFBnB
+no open
 small
 R,R,_
 B,B,_

@@ -1,14 +1,14 @@
 DFBnB
 no open
 big
-R,R,R,R,_
-B,B,B,B,_
-G,G,G,G,_
-Y,Y,Y,Y,_
-_,_,_,_,_
+G,Y,Y,Y,_
+_,G,_,_,B
+B,R,G,B,_
+_,G,Y,_,_
+R,_,R,R,B
 Goal state:
-R,R,_,_,_
-B,B,B,B,_
-G,_,R,Y,_
-Y,Y,Y,G,_
-_,_,R,G,G
+G,Y,Y,Y,Y
+G,_,_,_,B
+G,_,_,_,B
+G,_,_,_,B
+R,R,R,R,B

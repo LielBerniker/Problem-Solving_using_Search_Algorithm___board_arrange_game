@@ -7,20 +7,21 @@ import java.util.List;
 public class Game_Node_State implements Comparable<Game_Node_State>{
     private char[][] current_State;
     private String path;
-    private int depth;
     Game_Node_State prev_node;
     private int board_size;
     private int cost;
+    private int depth;
     private int heuristic;
     private int iteration;
+    private String unique_key;
     private boolean out;
 
 
     public Game_Node_State(String cur_state, int board_size){
         this.current_State = new char[board_size][board_size];
         this.path="";
-        this.depth=0;
         this.iteration =0;
+        this.depth =0;
         this.heuristic = 0;
         this.prev_node = null;
         this.cost =0;
@@ -33,14 +34,15 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
                 k = k+2;
             }
         }
+        this.unique_key = getNode_unique_key();
     }
     public Game_Node_State(Game_Node_State prev_node, Direction direct, int board_size, int row , int col){
         this.board_size = board_size;
         this.heuristic = 0;
-        this.iteration =0;
-        this.out = false;
-        this.prev_node = prev_node;
+        this.iteration = 0;
         this.depth = prev_node.getDepth()+1;
+        this.prev_node =prev_node;
+        this.out = false;
         this.current_State = new char[board_size][board_size];
         for (int i = 0; i < this.board_size; i++) {
             for (int j = 0; j < this.board_size; j++) {
@@ -48,6 +50,7 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
             }
         }
         setBoard_state(row,col,direct,prev_node);
+        this.unique_key = getNode_unique_key();
 
     }
     private void setBoard_state(int row, int col,Direction direct,Game_Node_State prev_node)
@@ -133,34 +136,41 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         {return true;}
         return false;
     }
-    public Point[] findBalls_location_by_color(char current_color)
+    public Point[] findBalls_location_by_color_3X3(char current_color)
     {
-        int size = this.getBoard_size();
-        int balls_amount,i=0;
-        if(size == 3)
-        {
-           balls_amount = 2;
-        }
-        else{
-            balls_amount = 4;
-        }
-        Point[] balls_location = new Point[balls_amount];
+        int balls_amount=2;
+        Point[] balls_locate = balls_location(current_color,balls_amount);
+        return balls_locate;
+    }
+    public Point[] findBalls_location_by_color_5X5(char current_color)
+    {
+        int balls_amount=4;
+        Point[] balls_locate = balls_location(current_color,balls_amount);
+        return balls_locate;
+    }
+    private Point[] balls_location(char current_color , int balls_amount)
+    {
+        Point[] balls_locate = new Point[balls_amount];
+        int i=0;
         for (int row = 0; row <this.getBoard_size(); row++) {
             for (int col = 0; col <this.getBoard_size() ; col++) {
                 if(this.getCurrent_state()[row][col] == current_color)
                 {
                     Point ball_location = new Point(row,col);
-                    balls_location[i]=ball_location;
+                    balls_locate[i]=ball_location;
                     i++;
                 }
             }
         }
-        return balls_location;
+        return balls_locate;
     }
-
    public String getNode_unique_key()
    {
-       return Arrays.deepToString(this.getCurrent_state());
+       return Arrays.deepToString(this.current_State);
+   }
+   public String getUnique_key()
+   {
+       return this.unique_key;
    }
 
     public int getBoard_size() {
@@ -218,6 +228,53 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
     public int getCost() {
         return this.cost;
     }
+    public String getNode_after_move(Direction direct, int row, int col)
+    {
+        String current_key ="";
+        switch(direct) {
+            case UP:
+                this.current_State[row][col] = this.current_State[row-1][col];
+                this.current_State[row-1][col] = '_';
+                current_key = this.getNode_unique_key();
+                this.current_State[row-1][col] = this.current_State[row][col];
+                this.current_State[row][col] = '_';
+                break;
+            case DOWN:
+                this.current_State[row][col] = this.current_State[row+1][col];
+                this.current_State[row+1][col] = '_';
+                current_key = this.getNode_unique_key();
+                this.current_State[row+1][col] = this.current_State[row][col];
+                this.current_State[row][col] = '_';
+                break;
+            case LEFT:
+                this.current_State[row][col] = this.current_State[row][col-1];
+                this.current_State[row][col-1] = '_';
+                current_key = this.getNode_unique_key();
+                this.current_State[row][col-1]  = this.current_State[row][col];
+                this.current_State[row][col] = '_';
+                break;
+            case RIGHT:
+                this.current_State[row][col] = this.current_State[row][col+1];
+                this.current_State[row][col+1] = '_';
+                current_key = this.getNode_unique_key();
+                this.current_State[row][col+1] = this.current_State[row][col];
+                this.current_State[row][col] = '_';
+                break;
+            default:
+                break;
+        }
+        return current_key;
+    }
+    public boolean equalTo_prev(Direction direct , int row, int col)
+    {
+        if(this.getPrev_node() == null)
+            return false;
+        String temp_key_move = this.getNode_after_move(direct,row,col);
+        String prev_key = this.getPrev_node().getUnique_key();
+        if(temp_key_move.equals(prev_key))
+            return true;
+        return false;
+    }
     @Override
     public boolean equals(Object o)
     {
@@ -232,13 +289,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
         if (!(o instanceof Game_Node_State)) {
             return false;
         }
-        char[][] compared_node = ((Game_Node_State) o).getCurrent_state();
-        for (int i = 0; i <this.getBoard_size() ; i++) {
-            for (int j = 0; j < this.getBoard_size(); j++) {
-                if(compared_node[i][j] != this.getCurrent_state()[i][j])
-                    return false;
-            }
-        }
+        String u_key = ((Game_Node_State) o).getUnique_key();
+        if(!this.unique_key.equals(u_key))
+            return false;
         return true;
     }
     public boolean currentIs_bigger(Game_Node_State o)
@@ -268,12 +321,9 @@ public class Game_Node_State implements Comparable<Game_Node_State>{
             {
                 return 1;
             }
-            else if(this.getIteration()>o.getIteration())
+            else
             {
                 return -1;
-            }
-            else{
-                return 1;
             }
         }
     }
