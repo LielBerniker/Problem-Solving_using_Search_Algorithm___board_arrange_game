@@ -819,6 +819,7 @@ public class Search_Algorithms {
          * @param end_p
          * @return return the distance in the baord by the rows al columns
          */
+        
         return (Math.abs(start_p.x - end_p.x) + Math.abs(start_p.y - end_p.y));
     }
 
